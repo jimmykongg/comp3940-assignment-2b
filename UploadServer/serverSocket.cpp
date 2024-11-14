@@ -10,7 +10,10 @@ using namespace std;
 
 ServerSocket::ServerSocket(int port) {
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) cerr << "opening stream socket" << endl;
+    if (sock < 0) {
+        perror("opening stream socket");
+        exit(EXIT_FAILURE);
+    }
 
     sockaddr_in serverAddress{};
     serverAddress.sin_family = AF_INET;
@@ -18,7 +21,9 @@ ServerSocket::ServerSocket(int port) {
     serverAddress.sin_port = htons(port);
 
     if (bind(sock, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress)) < 0) {
-        cerr << "binding stream socket" << endl;
+        perror("binding stream socket");
+        close(sock);
+        exit(EXIT_FAILURE);
     }
 
     listen(sock, 5);
