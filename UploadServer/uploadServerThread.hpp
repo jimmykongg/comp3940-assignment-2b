@@ -4,14 +4,13 @@
 #pragma once
 
 #include <string>
-
-#include "serverSocket.hpp"
+#include <sys/_pthread/_pthread_t.h>
 
 using namespace std;
 
 class Thread {
 private:
-    void *state;
+    pthread_t* tid;
     Thread *childThread;
 
 public:
@@ -23,12 +22,11 @@ public:
 
 class UploadServerThread : public Thread {
 private:
-    string name;
-    Socket *connectionSocket;
-    int clientSocket = 0;
+    string name = "UploadServerThread"; /* TODO: Fix the bug of outputting garbage characters code */
+    int connectionSocket;
 
 public:
-    UploadServerThread(string name, Socket *socket);
+    UploadServerThread(int socket);
     ~UploadServerThread();
     void run() override;
 };

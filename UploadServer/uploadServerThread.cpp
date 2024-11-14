@@ -19,21 +19,17 @@ void *startRunning(void *arg) {
     return nullptr;
 }
 
-Thread::Thread(Thread *childThread): childThread(childThread) {
-    state = malloc(sizeof(pthread_t));
-}
+Thread::Thread(Thread *childThread): tid(new pthread_t()), childThread(childThread) {}
 
-Thread::~Thread() { free(state); }
+Thread::~Thread() { delete tid; }
 
 void Thread::start() {
-    pthread_t tid;
-    pthread_create(&tid, nullptr, startRunning, this);
+    pthread_create(tid, nullptr, startRunning, this);
     cout << "Thread created and started" << endl;
-    memcpy(state, &tid, sizeof(pthread_t));
+    // memcpy(tid, &tid, sizeof(pthread_t));
 }
 
-UploadServerThread::UploadServerThread(string name, Socket* socket): Thread(this),
-    name(name), connectionSocket(socket) {}
+UploadServerThread::UploadServerThread(int socket): Thread(this), connectionSocket(socket) {}
 
 UploadServerThread::~UploadServerThread() = default;
 
@@ -42,10 +38,10 @@ void UploadServerThread::run() {
         cout << name << ": started handling client request" << endl;
         char buffer[1024] = {}; // zero initialization
 
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        int bytesReceived = recv(connectionSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived < 0) {
             perror("recv");
-            close(clientSocket);
+            close(connectionSocket);
             return;
         }
 
@@ -62,20 +58,20 @@ void UploadServerThread::run() {
         if (httpMethod == "GET") {
             cout << "HTTP Method: GET" << endl;
             string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nGET request received!";
-            send(clientSocket, response.c_str(), response.length(), 0);
+            send(connectionSocket, response.c_str(), response.length(), 0);
         } else if (httpMethod == "POST") {
             cout << "HTTP Method: POST" << endl;
             std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nPOST request received!";
-            send(clientSocket, response.c_str(), response.length(), 0);
+            send(connectionSocket, response.c_str(), response.length(), 0);
         } else {
             cout << "Unknown HTTP Method: " << httpMethod << endl;
             string response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nUnsupported method!";
-            send(clientSocket, response.c_str(), response.length(), 0);
+            send(connectionSocket, response.c_str(), response.length(), 0);
         }
 
-        close(clientSocket);
+        close(connectionSocket);
     } catch (...) {
         cerr << "Error handling client connection" << endl;
-        close(clientSocket);
+        close(connectionSocket);
     }
 }

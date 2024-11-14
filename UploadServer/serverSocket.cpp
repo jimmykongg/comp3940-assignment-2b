@@ -26,15 +26,19 @@ ServerSocket::ServerSocket(int port) {
         exit(EXIT_FAILURE);
     }
 
-    listen(sock, 5);
+    if (listen(sock, 5) < 0) {
+        perror("listening stream socket");
+        close(sock);
+        exit(EXIT_FAILURE);
+    }
+    cout << "Server listening on port " << port << endl;
 }
 
-Socket *ServerSocket::Accept() const {
+int ServerSocket::Accept() const {
     sockaddr_in clientAddress{};
     socklen_t clientAddressLength = sizeof(clientAddress);
     int connectionSocket = accept(sock, reinterpret_cast<struct sockaddr *>(&clientAddress), &clientAddressLength);
-    Socket *cs = new Socket(connectionSocket);
-    return cs;
+    return connectionSocket;
 }
 
 ServerSocket::~ServerSocket() = default;

@@ -17,6 +17,6 @@ private:
 
 public:
     ServerSocket(int port);
-    Socket* Accept() const;
+    int Accept() const;
     ~ServerSocket();
 };
