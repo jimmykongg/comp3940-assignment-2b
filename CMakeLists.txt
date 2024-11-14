@@ -8,4 +8,6 @@ add_executable(comp3940_assignment_2b main.cpp
         UploadServer/serverSocket.cpp
         UploadServer/uploadServer.cpp
         UploadServer/uploadServerThread.hpp
-        UploadServer/uploadServerThread.cpp)
+        UploadServer/uploadServerThread.cpp
+        UploadServer/httpServletRequest.hpp
+        UploadServer/httpServletResponse.hpp)
