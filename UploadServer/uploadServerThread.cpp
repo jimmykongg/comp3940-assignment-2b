@@ -4,73 +4,61 @@
 #include <ostream>
 #include <sstream>
 #include <pthread.h>
-#include <cstring>
-#include <unistd.h>
-#include <sys/socket.h>
 #include <sys/_pthread/_pthread_t.h>
 
 using namespace std;
 
-void *startRunning(void *arg) {
-    if (arg == nullptr) return nullptr;
+void* startRunning(void* arg) {
+    if (arg == nullptr) {
+        cerr << "Error: startRunning received a null pointer" << endl;
+        return nullptr;
+    }
+    cout << "startRunning received thread: " << arg << endl;
 
-    UploadServerThread *thread = static_cast<UploadServerThread *>(arg);
+    auto* thread = (Thread*) arg;
     thread->run();
     return nullptr;
 }
 
-Thread::Thread(Thread *childThread): tid(new pthread_t()), childThread(childThread) {}
+Thread::Thread(): tid(new pthread_t()) {}
 
 Thread::~Thread() { delete tid; }
 
 void Thread::start() {
     pthread_create(tid, nullptr, startRunning, this);
-    cout << "Thread created and started" << endl;
 }
 
-UploadServerThread::UploadServerThread(Socket* socket): Thread(this), socket(socket) {}
+UploadServerThread::UploadServerThread(Socket* socket): socket(socket), name("UploadServerThread") {}
 
-UploadServerThread::~UploadServerThread() { delete socket; };
+UploadServerThread::~UploadServerThread() {
+    delete socket;
+    delete httpServlet;
+};
 
 void UploadServerThread::run() {
     try {
         cout << name << ": started handling client request" << endl;
-        char buffer[1024] = {}; // zero initialization
 
-        int bytesReceived = recv(socket->getSocket(), buffer, sizeof(buffer) - 1, 0);
-        if (bytesReceived < 0) {
-            perror("recv");
-            close(socket->getSocket());
-            return;
-        }
-
-        // Load buffer into stringstream
-        stringstream requestStream(buffer);
+        stringstream requestStream = socket->read();
         string requestLine;
         getline(requestStream, requestLine);
 
         // Parse HTTP method from request line
-        string httpMethod;
-        stringstream lineStream(requestLine);
-        lineStream >> httpMethod;
+        istringstream lineStream(requestLine);
+        string httpMethod, path;
+        lineStream >> httpMethod >> path;
+        cout << "Request HTTP method: " << httpMethod << endl;
+        cout << "Request path: " << path << endl;
 
-        if (httpMethod == "GET") {
-            cout << "HTTP Method: GET" << endl;
-            string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nGET request received!";
-            send(socket->getSocket(), response.c_str(), response.length(), 0);
-        } else if (httpMethod == "POST") {
-            cout << "HTTP Method: POST" << endl;
-            std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nPOST request received!";
-            send(socket->getSocket(), response.c_str(), response.length(), 0);
+        if (httpMethod == "GET" && path == "/upload") {
+            httpServlet->doGet(socket, true);
         } else {
-            cout << "Unknown HTTP Method: " << httpMethod << endl;
-            string response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nUnsupported method!";
-            send(socket->getSocket(), response.c_str(), response.length(), 0);
+            /* TODO: Call doPost */
         }
 
-        close(socket->getSocket());
+        socket->closeConnection();
     } catch (...) {
         cerr << "Error handling client connection" << endl;
-        close(socket->getSocket());
+        socket->closeConnection();
     }
 }

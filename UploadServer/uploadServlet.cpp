@@ -1,18 +1,16 @@
 #include "uploadServlet.hpp"
 
 #include <iostream>
-#include <sys/socket.h>
+#include <sstream>
 using namespace std;
 
 extern int PORT;
 const string UploadServlet::CRLF = "\r\n";
 
-void UploadServlet::doGet(HttpServletRequest &request, HttpServletResponse &response, Socket* socket) {
+void UploadServlet::doGet(Socket* socket, bool isCorrectPath) {
     try {
-        ostream* out = response.getOutputStream();
-
         string port = to_string(PORT);
-        string htmlContent =
+        string htmlContent = isCorrectPath ?
             "<!DOCTYPE html>"
             "<html>"
             "<body>"
@@ -24,7 +22,11 @@ void UploadServlet::doGet(HttpServletRequest &request, HttpServletResponse &resp
             "<input type=\"submit\" value=\"Submit\" />"
             "</form>"
             "</body>"
-            "</html>";
+            "</html>" :
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/plain\r\n"
+            "Content-Length: 13\r\n\r\n"
+            "Not Found";
 
         // Calculate the content length
         size_t contentLength = htmlContent.length();
@@ -34,10 +36,14 @@ void UploadServlet::doGet(HttpServletRequest &request, HttpServletResponse &resp
                 "Content-Type: text/html; charset=UTF-8" + CRLF +
                 "Content-Length: " + to_string(contentLength) + CRLF +
                 "Connection: close" + CRLF + CRLF;
-        *out << header << htmlContent << CRLF << CRLF;
 
-        send(socket->getConnection(), static_cast<ostringstream>(*out), response.length(), 0);
+        stringstream oss;
+        oss << header << htmlContent << CRLF << CRLF;
+
+        socket->write(oss);
     } catch (exception &e) {
         cerr << "Error: " << e.what() << endl;
     }
 }
+
+void UploadServlet::doPost(Socket* socket, bool isCorrectPath) {}

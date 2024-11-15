@@ -38,6 +38,7 @@ Socket* ServerSocket::Accept() const {
     sockaddr_in clientAddress{};
     socklen_t clientAddressLength = sizeof(clientAddress);
     int connectionSocket = accept(sock, reinterpret_cast<struct sockaddr *>(&clientAddress), &clientAddressLength);
+    cout << "Accepted new client connection" << endl;
     return new Socket(connectionSocket);
 }
 
@@ -47,14 +48,23 @@ Socket::Socket(int sockfd): sockfd(sockfd) {}
 
 Socket::~Socket() = default;
 
-char *Socket::read() const {
-    auto buffer = new char[1024];
-    recv(sockfd, buffer, sizeof(buffer) - 1, 0);
-    return buffer;
+stringstream Socket::read() const {
+    cout << "Reading from socket" << endl;
+    char buffer[1024];
+    int bytesReceived = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+
+    if (bytesReceived < 0) {
+        perror("recv");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+
+    stringstream requestStream(buffer);
+    return requestStream;
 }
 
-void Socket::write(istringstream &iss) const {
-    string message = iss.str();
+void Socket::write(stringstream &oss) const {
+    string message = oss.str();
     send(sockfd, message.c_str(), message.size(), 0);
 }
 

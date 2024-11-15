@@ -1,6 +1,4 @@
 #pragma once
-#include "httpServletRequest.hpp"
-#include "httpServletResponse.hpp"
 #include "serverSocket.hpp"
 
 using namespace std;
@@ -9,19 +7,23 @@ class HttpServlet {
 public:
     virtual ~HttpServlet() = default;
 
-protected:
-    virtual void doGet(HttpServletRequest &request, HttpServletResponse &response, Socket* socket) = 0;
+    /**
+     * Handle get requests
+     * @param socket connection socket
+     * @param isCorrectPath boolean that checks whether clients use the correct path to access the server
+     */
+    virtual void doGet(Socket* socket, bool isCorrectPath) = 0;
 
-    virtual void doPost(HttpServletRequest &request, HttpServletResponse &response, Socket* socket) = 0;
+    virtual void doPost(Socket* socket, bool isCorrectPath) = 0;
 };
 
 class UploadServlet : public HttpServlet {
 private:
     const static string CRLF;
 
-protected:
-    void doGet(HttpServletRequest &request, HttpServletResponse &response, Socket* socket) override;
+public:
+    void doGet(Socket* socket, bool isCorrectPath) override;
 
-    void doPost(HttpServletRequest &request, HttpServletResponse &response, Socket* socket) override;
+    void doPost(Socket* socket, bool isCorrectPath) override;
 };
 

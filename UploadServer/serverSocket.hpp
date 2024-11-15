@@ -1,6 +1,6 @@
 #pragma once
 #include <sstream>
-#include <sys/socket.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -13,15 +13,15 @@ private:
     int sockfd;
 
 public:
-    Socket(int connectionSocket);
+    Socket(int sockfd);
 
     ~Socket();
 
-    int getSocket() const;
+    stringstream read() const;
 
-    char *read() const;
+    void write(stringstream& oss) const;
 
-    void write(istringstream& iss) const;
+    void closeConnection() const { close(sockfd); }
 };
 
 class ServerSocket {

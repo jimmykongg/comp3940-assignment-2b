@@ -1,22 +1,19 @@
-//
-// Created by Jimmy Kong on 2024-11-13.
-//
 #pragma once
 
 #include <string>
 #include <sys/_pthread/_pthread_t.h>
 
 #include "serverSocket.hpp"
+#include "uploadServlet.hpp"
 
 using namespace std;
 
 class Thread {
 private:
-    pthread_t* tid;
-    Thread *childThread;
+    pthread_t* tid = nullptr;
 
 public:
-    Thread(Thread *childThread);
+    Thread();
     virtual ~Thread();
     virtual void run() = 0;
     virtual void start();
@@ -24,8 +21,9 @@ public:
 
 class UploadServerThread : public Thread {
 private:
-    string name = "UploadServerThread"; /* TODO: Fix the bug of outputting garbage characters code */
+    string name; /* TODO: Fix the bug of outputting garbage characters code */
     Socket* socket;
+    HttpServlet* httpServlet = new UploadServlet();
 
 public:
     UploadServerThread(Socket* socket);
