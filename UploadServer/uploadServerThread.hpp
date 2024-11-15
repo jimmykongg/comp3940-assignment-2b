@@ -21,7 +21,7 @@ public:
 
 class UploadServerThread : public Thread {
 private:
-    string name; /* TODO: Fix the bug of outputting garbage characters code */
+    string name;
     Socket* socket;
     HttpServlet* httpServlet = new UploadServlet();
 
