@@ -1,14 +1,27 @@
 #pragma once
+#include <sstream>
+#include <sys/socket.h>
 
+using namespace std;
+
+/*
+ * Wrapper class for connection/client/message socket,
+ * which is created by ServerSocket when it accepts TCP connections
+ */
 class Socket {
 private:
-    int connectionSocket;
+    int sockfd;
 
 public:
     Socket(int connectionSocket);
-    char* getRequest() const;
-    void sendResponse(char* res) const;
+
     ~Socket();
+
+    int getSocket() const;
+
+    char *read() const;
+
+    void write(istringstream& iss) const;
 };
 
 class ServerSocket {
@@ -17,6 +30,8 @@ private:
 
 public:
     ServerSocket(int port);
-    int Accept() const;
+
     ~ServerSocket();
+
+    Socket* Accept() const;
 };

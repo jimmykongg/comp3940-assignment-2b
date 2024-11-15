@@ -6,6 +6,8 @@
 #include <string>
 #include <sys/_pthread/_pthread_t.h>
 
+#include "serverSocket.hpp"
+
 using namespace std;
 
 class Thread {
@@ -23,10 +25,12 @@ public:
 class UploadServerThread : public Thread {
 private:
     string name = "UploadServerThread"; /* TODO: Fix the bug of outputting garbage characters code */
-    int connectionSocket;
+    Socket* socket;
 
 public:
-    UploadServerThread(int socket);
+    UploadServerThread(Socket* socket);
+
     ~UploadServerThread();
+
     void run() override;
 };

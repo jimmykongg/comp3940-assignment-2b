@@ -26,22 +26,21 @@ Thread::~Thread() { delete tid; }
 void Thread::start() {
     pthread_create(tid, nullptr, startRunning, this);
     cout << "Thread created and started" << endl;
-    // memcpy(tid, &tid, sizeof(pthread_t));
 }
 
-UploadServerThread::UploadServerThread(int socket): Thread(this), connectionSocket(socket) {}
+UploadServerThread::UploadServerThread(Socket* socket): Thread(this), socket(socket) {}
 
-UploadServerThread::~UploadServerThread() = default;
+UploadServerThread::~UploadServerThread() { delete socket; };
 
 void UploadServerThread::run() {
     try {
         cout << name << ": started handling client request" << endl;
         char buffer[1024] = {}; // zero initialization
 
-        int bytesReceived = recv(connectionSocket, buffer, sizeof(buffer) - 1, 0);
+        int bytesReceived = recv(socket->getSocket(), buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived < 0) {
             perror("recv");
-            close(connectionSocket);
+            close(socket->getSocket());
             return;
         }
 
@@ -58,20 +57,20 @@ void UploadServerThread::run() {
         if (httpMethod == "GET") {
             cout << "HTTP Method: GET" << endl;
             string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nGET request received!";
-            send(connectionSocket, response.c_str(), response.length(), 0);
+            send(socket->getSocket(), response.c_str(), response.length(), 0);
         } else if (httpMethod == "POST") {
             cout << "HTTP Method: POST" << endl;
             std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nPOST request received!";
-            send(connectionSocket, response.c_str(), response.length(), 0);
+            send(socket->getSocket(), response.c_str(), response.length(), 0);
         } else {
             cout << "Unknown HTTP Method: " << httpMethod << endl;
             string response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nUnsupported method!";
-            send(connectionSocket, response.c_str(), response.length(), 0);
+            send(socket->getSocket(), response.c_str(), response.length(), 0);
         }
 
-        close(connectionSocket);
+        close(socket->getSocket());
     } catch (...) {
         cerr << "Error handling client connection" << endl;
-        close(connectionSocket);
+        close(socket->getSocket());
     }
 }

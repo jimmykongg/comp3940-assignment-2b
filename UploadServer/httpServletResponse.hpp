@@ -6,11 +6,7 @@
 
 using namespace std;
 
-class HttpServletResponse {
-private:
-    ostream* outputStream;
-
-public:
+struct HttpServletResponse {
     HttpServletResponse(ostream* outputStream): outputStream(outputStream) {}
 
     ~HttpServletResponse() = default;

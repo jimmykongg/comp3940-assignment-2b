@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <resolv.h>
-#include <cstring>
+#include <sstream>
 #include <unistd.h>
 
 using namespace std;
@@ -34,37 +34,27 @@ ServerSocket::ServerSocket(int port) {
     cout << "Server listening on port " << port << endl;
 }
 
-int ServerSocket::Accept() const {
+Socket* ServerSocket::Accept() const {
     sockaddr_in clientAddress{};
     socklen_t clientAddressLength = sizeof(clientAddress);
     int connectionSocket = accept(sock, reinterpret_cast<struct sockaddr *>(&clientAddress), &clientAddressLength);
-    return connectionSocket;
+    return new Socket(connectionSocket);
 }
 
 ServerSocket::~ServerSocket() = default;
 
-Socket::Socket(int connectionSocket) {
-    this->connectionSocket = connectionSocket;
-}
+Socket::Socket(int sockfd): sockfd(sockfd) {}
 
-char *Socket::getRequest() const {
-    char *buffer = new char[1024];
+Socket::~Socket() = default;
 
-    if (recv(connectionSocket, buffer, 1024, 0) < 0) {
-        cerr << "reading data to connection socket" << endl;
-    } else {
-        cout << "Data read: " << *buffer << endl;
-    }
-
+char *Socket::read() const {
+    auto buffer = new char[1024];
+    recv(sockfd, buffer, sizeof(buffer) - 1, 0);
     return buffer;
 }
 
-void Socket::sendResponse(char *res) const {
-    if (send(connectionSocket, res, strlen(res), 0) < 0) {
-        cerr << "sending data from connection socket" << endl;
-    } else {
-        cout << "Data Written: " << *res << endl;
-    }
+void Socket::write(istringstream &iss) const {
+    string message = iss.str();
+    send(sockfd, message.c_str(), message.size(), 0);
 }
 
-Socket::~Socket() = default;

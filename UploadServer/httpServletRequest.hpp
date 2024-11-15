@@ -1,17 +1,16 @@
-//
-// Created by Jimmy Kong on 2024-11-14.
-//
 #pragma once
 #include <istream>
+
+#include "serverSocket.hpp"
 
 using namespace std;
 
 class HttpServletRequest {
 private:
-    istream* inputStream;
+    Socket* socket;
 
 public:
-    HttpServletRequest(istream* inputStream): inputStream(inputStream) {}
+    HttpServletRequest(Socket::InputStream inputStream): inputStream(inputStream) {}
 
     ~HttpServletRequest() = default;
 
