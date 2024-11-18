@@ -1,4 +1,5 @@
 #include "uploadServerThread.hpp"
+#include "UploadServerException.hpp"
 
 #include <iostream>
 #include <ostream>
@@ -51,14 +52,28 @@ void UploadServerThread::run() {
         cout << "Request path: " << path << endl;
 
         if (httpMethod == "GET" && path == "/upload") {
+            if (!httpServlet) {
+                throw UploadServer::UploadServerException("HTTP servlet is null");
+            }
             httpServlet->doGet(socket, true);
+        } else if (httpMethod == "POST" && path == "/upload") {
+            if (!httpServlet) {
+                throw UploadServer::UploadServerException("HTTP servlet is null");
+            }
+            httpServlet->doPost(socket, true);
         } else {
-            /* TODO: Call doPost */
+            throw UploadServer::UploadServerException("Unsupported HTTP method or path: " + httpMethod + " " + path);
         }
 
         socket->closeConnection();
+    } catch (const UploadServer::UploadServerException& e) {
+        cerr << name << ": Upload server error: " << e.what() << endl;
+        socket->closeConnection();
+    } catch (const std::exception& e) {
+        cerr << name << ": Standard error: " << e.what() << endl;
+        socket->closeConnection();
     } catch (...) {
-        cerr << "Error handling client connection" << endl;
+        cerr << name << ": Unknown error occurred" << endl;
         socket->closeConnection();
     }
 }
