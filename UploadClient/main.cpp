@@ -88,7 +88,6 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
             std::string chunk(fileContent.data() + i, currentChunkSize);
             client.sendRequest(chunk);
             totalSent += currentChunkSize;
-            std::cout << "Sent " << totalSent << "/" << fileSize << " bytes" << std::endl;
         }
 
 
@@ -114,7 +113,7 @@ int main() {
 //    const int port = 8083;
 
     // Change file name here
-    const std::string filePath = "/Users/ziqi/Desktop/test3.txt";
+    const std::string filePath = "/Users/stevenly/Desktop/damage.jpeg";
 
     std::cout << "Uploading file: " << filePath << " to server " << host << ":" << port << std::endl;
     uploadFile(host, port, filePath);

@@ -100,7 +100,6 @@ stringstream Socket::read() const {
             size_t remainingBytes = contentLength - totalBytesRead;
             size_t currentBufferSize = min(bufferSize, remainingBytes);
 
-            cout << "Reading chunk. Remaining bytes: " << remainingBytes << endl;
             int bytesReceived = recv(sockfd, buffer.data(), currentBufferSize, 0);
 
             if (bytesReceived <= 0) {
@@ -110,7 +109,6 @@ stringstream Socket::read() const {
 
             requestStream.write(buffer.data(), bytesReceived);
             totalBytesRead += bytesReceived;
-            cout << "Read " << bytesReceived << " bytes. Total: " << totalBytesRead << "/" << contentLength << endl;
         }
         cout << "Finished reading body" << endl;
     }
