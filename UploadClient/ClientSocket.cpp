@@ -28,7 +28,15 @@ void ClientSocket::connectToServer() {
 }
 
 void ClientSocket::sendRequest(const std::string& request) {
-    send(sock, request.c_str(), request.length(), 0);
+    size_t totalSent = 0;
+    while (totalSent < request.length()) {
+        ssize_t sent = send(sock, request.c_str() + totalSent, request.length() - totalSent, 0);
+        if (sent < 0) {
+            perror("Failed to send data");
+            throw std::runtime_error("Send failed");
+        }
+        totalSent += sent;
+    }
 }
 
 std::string ClientSocket::receiveResponse() {
