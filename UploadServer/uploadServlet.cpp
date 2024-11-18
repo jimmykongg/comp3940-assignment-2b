@@ -58,6 +58,14 @@ void UploadServlet::doPost(Socket* socket, bool isCorrectPath) {
         string request = requestStream.str();
         cout << "Request fully read. Processing content..." << endl;
 
+        // Create uploads directory if it doesn't exist
+        const string uploadDir = "uploads";
+        struct stat st = {0};
+        if (stat(uploadDir.c_str(), &st) == -1) {
+            mkdir(uploadDir.c_str(), 0700);
+            cout << "Created uploads directory" << endl;
+        }
+
         // Extract boundary
         size_t boundaryPos = request.find("boundary=");
         if (boundaryPos == string::npos) {

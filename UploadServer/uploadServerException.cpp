@@ -7,5 +7,5 @@ UploadServerException::UploadServerException(const std::string& message)
 
 UploadServerException::UploadServerException(const std::string& message, const std::exception& cause)
     : std::runtime_error(message + ": " + cause.what()) {}
-
+}
 

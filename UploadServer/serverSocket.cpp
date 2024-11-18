@@ -1,5 +1,6 @@
 #include "serverSocket.hpp"
 
+#include <cstring>
 #include <iostream>
 #include <sys/socket.h>
 #include <resolv.h>
@@ -21,7 +22,7 @@ ServerSocket::ServerSocket(int port) {
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(port);
 
-    if (bind(sock, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress)) < 0) {
+    if (::bind(sock, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress)) < 0) {
         perror("binding stream socket");
         close(sock);
         exit(EXIT_FAILURE);

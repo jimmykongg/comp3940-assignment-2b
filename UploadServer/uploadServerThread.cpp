@@ -61,7 +61,15 @@ void UploadServerThread::run() {
 
         if (httpMethod == "POST" && path == "/upload") {
             cout << "Starting POST request processing..." << endl;
+            // Create uploads directory if it doesn't exist
+            const string uploadDir = "uploads";
 
+            // Use proper includes and system calls for directory creation
+#ifdef _WIN32
+            _mkdir(uploadDir.c_str());
+#else
+            mkdir(uploadDir.c_str(), 0755);
+#endif
             // Extract boundary
             size_t boundaryPos = request.find("boundary=");
             if (boundaryPos == string::npos) {
