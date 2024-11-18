@@ -1,7 +1,9 @@
 #pragma once
+#include <string>
 #include <sstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
-
 using namespace std;
 
 /*
@@ -10,7 +12,7 @@ using namespace std;
  */
 class Socket {
 private:
-    int sockfd;
+    mutable int sockfd;
 
 public:
     Socket(int sockfd);
@@ -21,7 +23,7 @@ public:
 
     void write(stringstream& oss) const;
 
-    void closeConnection() const { close(sockfd); }
+    void closeConnection() const;
 };
 
 class ServerSocket {
