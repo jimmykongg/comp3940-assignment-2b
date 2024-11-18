@@ -31,13 +31,21 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
         std::cout << "Filename: " << filename << std::endl;
 
         // Create boundary
-        std::string boundary = "------------------------" + std::to_string(time(nullptr));
+        std::string boundary = "*****" + std::to_string(time(nullptr)) + "*****";
         std::cout << "Using boundary: " << boundary << std::endl;
 
         // Create multipart body
-        std::string bodyStart = "--" + boundary + "\r\n"
-                               "Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"\r\n"
-                               "Content-Type: image/jpeg\r\n\r\n";
+        std::string bodyStart =  "--" + boundary + "\r\n"
+                         "Content-Disposition: form-data; name=\"File\"; filename=\"" + filename + "\"\r\n"
+                         "Content-Type: image/jpeg\r\n\r\n";
+
+//            "--" + boundary + "\r\n"
+//                         "Content-Disposition: form-data; name=\"caption\"\r\n\r\n"
+//                         "Test Caption\r\n"
+//                         "--" + boundary + "\r\n"
+//                         "Content-Disposition: form-data; name=\"date\"\r\n\r\n"
+//                         "2024-11-17\r\n"
+
 
         std::string bodyEnd = "\r\n--" + boundary + "--\r\n";
 
@@ -54,6 +62,7 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
         std::cout << "Sending headers..." << std::endl;
         client.sendRequest(headers);
 
+        // Send body start (caption, date)
         std::cout << "Sending body start..." << std::endl;
         client.sendRequest(bodyStart);
 
@@ -69,13 +78,15 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
             std::cout << "Sent " << totalSent << "/" << fileSize << " bytes" << std::endl;
         }
 
+
+        // Send body end
         std::cout << "Sending body end..." << std::endl;
         client.sendRequest(bodyEnd);
 
+        // Wait for response
         std::cout << "Waiting for response..." << std::endl;
         std::string response = client.receiveResponse();
         std::cout << "Server Response:\n" << response << std::endl;
-
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
@@ -85,7 +96,7 @@ int main() {
     const std::string host = "127.0.0.1";
     const int port = 8999;
     // Change file name here
-    const std::string filePath = "/Users/stevenly/Desktop/damage.jpeg";
+    const std::string filePath = "/Users/henrytan/Desktop/test.jpg";
 
     std::cout << "Uploading file: " << filePath << " to server " << host << ":" << port << std::endl;
     uploadFile(host, port, filePath);
