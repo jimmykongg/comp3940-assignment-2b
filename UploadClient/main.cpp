@@ -54,10 +54,23 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
         std::cout << "Total content length: " << contentLength << " bytes" << std::endl;
 
         // Create rq headers
+        // --------------
+        // HEADER CODE FOR NATIVE
+        // --------------
         std::string headers = "POST /upload HTTP/1.1\r\n"
                             "Host: " + host + ":" + std::to_string(port) + "\r\n"
                             "Content-Type: multipart/form-data; boundary=" + boundary + "\r\n"
                             "Content-Length: " + std::to_string(contentLength) + "\r\n\r\n";
+
+        // --------------
+        // HEADER CODE FOR TOMCAT
+        // --------------
+        // change /upload/upload to Tomcat path for UploadServer
+//        std::string headers = "POST /upload/upload HTTP/1.1\r\n"
+//                            "Host: " + host + ":" + std::to_string(port) + "\r\n"
+//                            "Content-Type: multipart/form-data; boundary=" + boundary + "\r\n"
+//                            "Content-Length: " + std::to_string(contentLength) + "\r\n\r\n";
+
 
         std::cout << "Sending headers..." << std::endl;
         client.sendRequest(headers);
@@ -94,7 +107,12 @@ void uploadFile(const std::string& host, int port, const std::string& filePath) 
 
 int main() {
     const std::string host = "127.0.0.1";
+
+    // Change port number depending on usage
     const int port = 8999;
+    // CHANGE PORT NUMBER TO TOMCAT
+//    const int port = 8083;
+
     // Change file name here
     const std::string filePath = "/Users/henrytan/Desktop/test.jpg";
 
