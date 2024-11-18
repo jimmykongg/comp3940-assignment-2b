@@ -7,10 +7,9 @@
 #include <sys/_pthread/_pthread_t.h>
 #include <fstream>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <string>
 #include <stdexcept>
-#include <fcntl.h>
+#include <dirent.h>
 
 using namespace std;
 
@@ -59,7 +58,9 @@ void UploadServerThread::run() {
         std::cout << "Request HTTP method: " << httpMethod << std::endl;
         std::cout << "Request path: " << path << std::endl;
 
-        if (httpMethod == "POST" && path == "/upload") {
+        if(httpMethod == "GET" && path == "/upload") {
+            httpServlet->doGet(socket, true);
+        }else if (httpMethod == "POST") {
             cout << "Starting POST request processing..." << endl;
             // Create uploads directory if it doesn't exist
             const string uploadDir = "uploads";
@@ -119,19 +120,50 @@ void UploadServerThread::run() {
             outFile.close();
             cout << "File saved successfully" << endl;
 
-            // Send success rs
-            stringstream response;
-            string successMsg = "File '" + filename + "' uploaded successfully to " + fullPath;
-            response << "HTTP/1.1 200 OK\r\n"
-                    << "Content-Type: text/plain\r\n"
-                    << "Content-Length: " << successMsg.length() << "\r\n"
-                    << "Connection: close\r\n\r\n"
-                    << successMsg;
+            if(path == "/upload") {
+                // Send success rs
+                stringstream response;
+                string successMsg = "File '" + filename + "' uploaded successfully to " + fullPath;
+                response << "HTTP/1.1 200 OK\r\n"
+                        << "Content-Type: text/plain\r\n"
+                        << "Content-Length: " << successMsg.length() << "\r\n"
+                        << "Connection: close\r\n\r\n"
+                        << successMsg;
 
-            cout << "Sending response to client..." << endl;
-            socket->write(response);
-            cout << "Response sent" << endl;
+                cout << "Sending response to client..." << endl;
+                socket->write(response);
+                cout << "Response sent" << endl;
+            }else if (path == "/") {
+                // Generate HTML response with file list
+                stringstream response;
+                string html = "<html><body><h1>Uploaded Files</h1><ul>";
 
+                // Read the uploads directory
+                DIR* dir = opendir(uploadDir.c_str());
+                if (dir == nullptr) {
+                    throw runtime_error("Failed to open uploads directory");
+                }
+
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != nullptr) {
+                    string fileName(entry->d_name);
+                    if (fileName != "." && fileName != "..") {
+                        html += "<li>" + fileName + "</li>";
+                    }
+                }
+                closedir(dir);
+
+                html += "</ul></body></html>";
+
+                response << "HTTP/1.1 200 OK\r\n"
+                         << "Content-Type: text/html\r\n"
+                         << "Content-Length: " << html.length() << "\r\n"
+                         << "Connection: close\r\n\r\n"
+                         << html;
+
+                cout << "Sending HTML response to client..." << endl;
+                socket->write(response);
+            }
         } else {
             stringstream response;
             string errorMsg = "404 Not Found";
