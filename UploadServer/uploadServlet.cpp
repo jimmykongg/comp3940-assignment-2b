@@ -23,7 +23,7 @@ void UploadServlet::doGet(Socket* socket, bool isCorrectPath) {
             "<form action=\"http://localhost:" + to_string(PORT) + "\" method=\"post\" enctype=\"multipart/form-data\">"
             "Caption: <input type=\"text\" name=\"caption\" /><br /><br />"
             "Date: <input type=\"date\" name=\"date\" /><br />"
-            "<input type=\"file\" name=\"fileName\" /><br /><br />"
+            "<input type=\"File\" name=\"fileName\" /><br /><br />"
             "<input type=\"submit\" value=\"Submit\" />"
             "</form>"
             "</body>"
