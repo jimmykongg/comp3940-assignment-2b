@@ -114,7 +114,7 @@ int main() {
 //    const int port = 8083;
 
     // Change file name here
-    const std::string filePath = "/Users/henrytan/Desktop/test.jpg";
+    const std::string filePath = "/Users/ziqi/Desktop/test3.txt";
 
     std::cout << "Uploading file: " << filePath << " to server " << host << ":" << port << std::endl;
     uploadFile(host, port, filePath);
